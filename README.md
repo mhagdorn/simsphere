@@ -72,4 +72,36 @@ cd simpshere
 scripts/build.sh
 ```
 
+### Building Static Version on School of GeoSciences machines
+1. use new fortran compiler
+```
+scl enable devtoolset-7 bash
+```
+2. install json-fortran
+```
+git clone git@github.com:mhagdorn/json-fortran.git
+cd json-fortran
+mkdir build
+cd build
+FC=gfortran cmake3 .. -DCMAKE_INSTALL_PREFIX=/SOME/PREFIX
+make && make install
+```
+3. install compare
+```
+git clone git@github.com:mhagdorn/compare.git
+cd compare
+mkdir build
+cd build
+FC=gfortran cmake3 .. -DCMAKE_INSTALL_PREFIX=/SOME/PREFIX
+make && make install
+```
+4. install simsphere
+```
+git clone git@github.com:mhagdorn/simsphere.git
+cd simsphere
+mkdir build
+cd build
+FC=gfortran cmake3 .. -DCMAKE_INSTALL_PREFIX=/SOME/PREFIX
+make
+```
 
