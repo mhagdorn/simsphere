@@ -3,11 +3,16 @@ cmake_minimum_required(VERSION 2.8 FATAL_ERROR)
 project(simsphere)
 enable_language(Fortran)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
 # set output paths for modules, archives, and executables
 set(CMAKE_Fortran_MODULE_DIRECTORY ${PROJECT_BINARY_DIR}/include)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# look for static libraries
+set(CMAKE_FIND_LIBRARY_SUFFIXES .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
 # if build type not specified, default to release
 if(NOT CMAKE_BUILD_TYPE)
@@ -28,19 +33,20 @@ if(CMAKE_Fortran_COMPILER_ID MATCHES Intel)
 endif()
 
 # libcompare is provided via git submodule from git://github.com/tcanich/compare
-add_subdirectory(externals/compare)
+#add_subdirectory(externals/compare)
 
 # libjson is provided by external script, built in the simsphere build json-build for Travis
 find_package(jsonfortran NAMES jsonfortran-gnu HINTS ${CMAKE_BINARY_DIR}/json REQUIRED)
+find_package(compare REQUIRED)
 
 # library to archive (libsimsphere)
-add_library(simsphere_mod SHARED src/simsphere_mod.f90 src/config_mod.f90 src/constants_mod.f90 src/snding_mod.f90 src/stomata_mod.f90 src/transm_mod.f90 src/vel_mod.f90 src/globals.f90)
-add_dependencies(simsphere_mod compare)
-target_link_libraries(simsphere_mod compare jsonfortran)
+add_library(simsphere_mod src/simsphere_mod.f90 src/config_mod.f90 src/constants_mod.f90 src/snding_mod.f90 src/stomata_mod.f90 src/transm_mod.f90 src/vel_mod.f90 src/globals.f90)
+target_include_directories(simsphere_mod PUBLIC ${COMPARE_MODULE_DIR})
+target_link_libraries(simsphere_mod ${COMPARE_LIBRARY} jsonfortran-static "-static")
 set_target_properties(simsphere_mod PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
 
 # Testing library (mod_testing)
-add_library(mod_testing SHARED tests/mod_testing.f90)
+add_library(mod_testing tests/mod_testing.f90)
 set_target_properties(mod_testing PROPERTIES INTERFACE_POSITION_INDEPENDENT_CODE ON)
 
 
@@ -82,7 +88,7 @@ add_executable(test_vegrad src/vegrad.f90  tests/test_vegrad.f90)
 add_executable(test_vegvel src/vegvel.f90 src/ball.f90 src/pslcal.f90 src/capac.f90  tests/test_vegvel.f90)
 add_executable(test_water src/water.f90  tests/test_water.f90)
 
-target_link_libraries(simsphere simsphere_mod compare)
+target_link_libraries(simsphere simsphere_mod ${COMPARE_LIBRARY})
 target_link_libraries(config jsonfortran)
 target_link_libraries(loadjson simsphere_mod)
 target_link_libraries(simsphere_test simsphere_mod mod_testing)
@@ -118,7 +124,7 @@ target_link_libraries(test_vegrad simsphere_mod mod_testing)
 target_link_libraries(test_vegvel simsphere_mod mod_testing)
 target_link_libraries(test_water simsphere_mod mod_testing)
 
-target_include_directories(simsphere_mod PRIVATE ${compare_BINARY_DIR}/include PRIVATE ${jsonfortran_INCLUDE_DIRS})
+target_include_directories(simsphere_mod PRIVATE ${COMPARE_MODULE_DIR} PRIVATE ${jsonfortran_INCLUDE_DIRS})
 target_include_directories(simsphere PRIVATE ${jsonfortran_INCLUDE_DIRS})
 target_include_directories(config PRIVATE ${jsonfortran_INCLUDE_DIRS})
 target_include_directories(loadjson PRIVATE ${jsonfortran_INCLUDE_DIRS})
