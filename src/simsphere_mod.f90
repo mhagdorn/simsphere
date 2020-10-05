@@ -143,6 +143,7 @@ module simsphere_mod
         WRITE (11,*) 'O3CAN: O3_conc_canopy (ppmv)'
         WRITE (11,*) 'GBLO3: Global_O3_flux (ug m-2 s-1)'
         WRITE (11,*) 'O3F: O3_flux_plant (ug m-2 s-1)'
+        WRITE (11,*) 'PBLZ: Planetary Boundary Layer Height (m)'
 
         WRITE (11,9)
 9       FORMAT(/' TIME    SWF   NETRAD    SENS    LE      GRF', &
@@ -152,7 +153,7 @@ module simsphere_mod
           '    BOW   SMA  RZMA', &
           '    STMR  VPDEF  LWPOT EWPOT   GWPOT     CO2F ', &
           ' CO2CAN', &
-          '    WATEFF   O3CAN  GBLO3   O3F'/)
+          '    WATEFF   O3CAN  GBLO3   O3F  PBLZ'/)
         endif
 
         outputinit = 2
@@ -199,6 +200,7 @@ module simsphere_mod
         call json%add(out,'O3_conc_canopy/ppmv',real(caf,real64))
         call json%add(out,'Global_O3_flux/ugm-2s-1',real(fglobal,real64))
         call json%add(out,'O3_flux_plant/ugm-2s-1',real(flux_plant,real64))
+        call json%add(out,'PBL Height/m',real(hgt,real64))
 
         if (writeTXT) then
          WRITE (11,10) PTIME,SWAVE,RNET,HEAT,EVAP,G_Flux, &
@@ -207,7 +209,7 @@ module simsphere_mod
               Q_Fine(1)*1000, QA*1000, QAF*1000, &
               Bowen, F, FSUB, Stom_R, vfl, psim, psie, psig, &
               co2_flux, ccan_concn, Water_Use_Eff,caf,fglobal, &
-              flux_plant
+              flux_plant, hgt
         endif
     
       else
@@ -245,6 +247,7 @@ module simsphere_mod
           call json%add(out,'O3_conc_canopy/ppmv',real(caf,real64))
           call json%add(out,'Global_O3_flux/ugm-2s-1',real(fglobal,real64))
           call json%add(out,'O3_flux_plant/ugm-2s-1',real(flux_plant,real64))
+          call json%add(out,'PBL Height/m',real(hgt,real64))
 
          if (writeTXT) then
          WRITE (11,10) PTIME,SWAVE,RNET,HEAT,EVAP,G_Flux, &
@@ -253,7 +256,7 @@ module simsphere_mod
               Q_Fine(1)*1000, QA*1000, QAF*1000, &
               Bowen, F, FSUB, Stom_R, vfl, psim, psie, psig, &
               co2_flux, ccan_concn, Water_Use_Eff,caf,fglobal, &
-              flux_plant
+              flux_plant, hgt
          end if
 
         else
@@ -289,6 +292,7 @@ module simsphere_mod
           call json%add(out,'O3_conc_canopy/ppmv',real(caf,real64))
           call json%add(out,'Global_O3_flux/ugm-2s-1',real(fglobal,real64))
           call json%add(out,'O3_flux_plant/ugm-2s-1',real(flux_plant,real64))
+          call json%add(out,'PBL Height/m',real(hgt,real64))
 
          if (writeTXT) then
          WRITE (11,10) PTIME,SWAVE,RNET,HEAT,EVAP,G_Flux, &
@@ -297,7 +301,7 @@ module simsphere_mod
               Q_Fine(1)*1000, QA*1000, QAF*1000, &
               Bowen, F, FSUB, Stom_R, vfl, psim, psie, psig, &
               co2_flux, ccan_concn, Water_Use_Eff,caf,fglobal, &
-              flux_plant
+              flux_plant, hgt
          end if
 
         endif
@@ -306,7 +310,7 @@ module simsphere_mod
     
   10  FORMAT (F5.2,1X,5(F7.2,1X),1X,10(F5.2,1X) &
               ,1X,F7.3,1X,F5.3,1X,F5.3,1X,F6.1,1X,F5.2,1X,2(F6.2,1X), &
-              G9.3E1,1X,F7.3,1X,F6.2,2X,G9.3E1,1X,3(F6.3,1X))
+              G9.3E1,1X,F7.3,1X,F6.2,2X,G9.3E1,1X,3(F6.3,1X),F6.1)
 
       return
     end subroutine output
